@@ -11,6 +11,7 @@
         font-family: 'Open Sans', sans-serif;
         font-size: 16pt;
       }
+        
       .axis .label {
         font-size: 20pt;
       }
@@ -29,41 +30,64 @@
   </head>
   <body>
     <script>
+        
+        
       var outerWidth = 500;
       var outerHeight = 250;
+        
+        
       var margin = { left: 90, top: 90, right: 30, bottom: 90 };
+        
       var barPadding = 0.2;
 
+        
       var xColumn = "religion";
       var radiusColumn = "population";
       var radiusMax = 25;
       var colorColumn = "religion";
+        
 
       var innerWidth  = outerWidth  - margin.left - margin.right;
       var innerHeight = outerHeight - margin.top  - margin.bottom;
 
+        
       var svg = d3.select("body").append("svg")
         .attr("width",  outerWidth)
         .attr("height", outerHeight);
+        
       var g = svg.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        
       var xAxisG = g.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + innerHeight + ")");
 
+    /* define xScale func and xScale.range */
       var xScale = d3.scale.ordinal().rangePoints([0, innerWidth], barPadding);
+        
+    /* define radiusScale func and its range */
       var radiusScale = d3.scale.sqrt().range([0, radiusMax]);
+
+    /* create colorScale func with category10 */
       var colorScale = d3.scale.category10();
 
+    /* create xAxis svg */
       var xAxis = d3.svg.axis().scale(xScale).orient("bottom")
         .outerTickSize(0);
 
+        
       function render(data){
 
+        /* set xScale.domain */
         xScale.domain( data.map( function (d){ return d[xColumn]; }));
+          
+        /* set radiusScale.domain */
         radiusScale.domain([0, d3.max(data, function (d){ return d[radiusColumn]; })]);
+          
+        /* set colorScale.domain */
         colorScale.domain(data.map(function (d){ return d[colorColumn]; }));
 
+        /* at xAxis group, create xAxis svg*/
         xAxisG
           .call(xAxis)
           .selectAll("text")  
@@ -71,16 +95,23 @@
           .attr("dy", "1em")
           .attr("transform", "rotate(-20)" );
 
+          
         var circles = g.selectAll("circle").data(data);
+          
         circles.enter().append("circle");
+          
         circles
           .attr("cx", function (d){ return xScale(d[xColumn]); })
           .attr("cy", innerHeight / 2)
           .attr("r", function (d){ return radiusScale(d[radiusColumn]); })
+        
+        /* fill color for each circle */
           .attr("fill", function (d){ return colorScale(d[colorColumn]); });
+          
         circles.exit().remove();
       }
 
+        
       function type(d){
         d.population = +d.population;
         return d;

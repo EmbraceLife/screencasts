@@ -26,62 +26,93 @@
   <body>
     <script>
 
+    
       var outerWidth = 500;
       var outerHeight = 250;
+        
       var margin = { left: 90, top: 30, right: 30, bottom: 30 };
+        
       var radiusMax = 80;
 
-      var xColumn = "name";
+        
+      var xColumn = "name"; // only one name available
+        
       var sliceSizeColumn = "population";
+        
       var colorColumn = "religion";
 
+    
       var innerWidth  = outerWidth  - margin.left - margin.right;
       var innerHeight = outerHeight - margin.top  - margin.bottom;
 
+        
       var svg = d3.select("body").append("svg")
         .attr("width",  outerWidth)
         .attr("height", outerHeight);
+        
+        
       var g = svg.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        
+        
       var xAxisG = g.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + innerHeight + ")");
+        
+    /* create a group for pie */
       var pieG = g.append("g");
+        
 
       var xScale = d3.scale.ordinal().rangePoints([0, innerWidth]);
+        
       var colorScale = d3.scale.category10();
 
+        
       var xAxis = d3.svg.axis().scale(xScale).orient("bottom")
         .outerTickSize(0);
 
+    /* create pie and arc instance */
       var pie = d3.layout.pie();
       var arc = d3.svg.arc();
+        
+    /* set arc inner and outer radius */
       arc.outerRadius(radiusMax);
       arc.innerRadius(0);
 
       function render(data){
 
+         
         xScale.domain(data.map( function (d){ return d[xColumn]; }));
+          
+          
         colorScale.domain(data.map(function (d){ return d[colorColumn]; }));
+          
+    /* assign population to pie.value */
         pie.value(function(d) { return d[sliceSizeColumn]; });
 
         xAxisG.call(xAxis);
 
+    /* get run pie on data to create pieData */
         var pieData = pie(data);
 
+    /* move pie group to the central place */
         pieG.attr("transform", "translate(" + innerWidth / 2 + "," + innerHeight / 2 + ")");
 
+    /* bind each pieData with path */
         var slices = pieG.selectAll("path").data(pieData);
+          
         slices.enter().append("path");
+          
         slices
-          .attr("d", arc)
+          .attr("d", arc) // special attribute for pie? see example 25
           .attr("fill", function (d){ return colorScale(d.data[colorColumn]); });
+          
         slices.exit().remove();
 
       }
 
       function type(d){
-        d.name = "World";
+        d.name = "World";// one element only
         d.population = +d.population;
         return d;
       }

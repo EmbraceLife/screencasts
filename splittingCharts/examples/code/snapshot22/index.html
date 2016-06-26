@@ -29,28 +29,42 @@
   </head>
   <body>
     <script>
+        
+        
       var outerWidth = 500;
       var outerHeight = 250;
+      
       var margin = { left: 90, top: 90, right: 30, bottom: 90 };
+      
       var barPadding = 0.2;
 
+        
       var xColumn = "religion";
       var radiusColumn = "population";
       var radiusMax = 25;
 
+        
       var innerWidth  = outerWidth  - margin.left - margin.right;
       var innerHeight = outerHeight - margin.top  - margin.bottom;
 
+        
       var svg = d3.select("body").append("svg")
         .attr("width",  outerWidth)
         .attr("height", outerHeight);
+        
+        
       var g = svg.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        
+        
       var xAxisG = g.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + innerHeight + ")");
 
+    /* if bar chart using rangeBands() */
       var xScale = d3.scale.ordinal().rangePoints([0, innerWidth], barPadding);
+        
+        
       var radiusScale = d3.scale.sqrt().range([0, radiusMax]);
 
       // Use a modified SI formatter that uses "B" for Billion.
@@ -59,14 +73,19 @@
         return siFormat(d).replace("G", "B");
       };
 
+        
       var xAxis = d3.svg.axis().scale(xScale).orient("bottom")
         .outerTickSize(0);
 
+        
       function render(data){
 
         xScale.domain(       data.map( function (d){ return d[xColumn]; }));
+          
+          
         radiusScale.domain([0, d3.max(data, function (d){ return d[radiusColumn]; })]);
 
+        /* x axis text style and rotate*/
         xAxisG
           .call(xAxis)
           .selectAll("text")  
@@ -74,12 +93,17 @@
           .attr("dy", "1em")
           .attr("transform", "rotate(-20)" );
 
+        
+        /* create circles to bind data */
         var circles = g.selectAll("circle").data(data);
+          
+        
         circles.enter().append("circle");
         circles
           .attr("cx", function (d){ return xScale(d[xColumn]); })
           .attr("cy", innerHeight / 2)
           .attr("r", function (d){ return radiusScale(d[radiusColumn]); });
+          
         circles.exit().remove();
       }
 
