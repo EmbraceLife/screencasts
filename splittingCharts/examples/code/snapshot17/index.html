@@ -158,12 +158,14 @@
         /* upon inner center g, create layerGroups to bind layers doms with dataset layers */
         var layerGroups = g.selectAll(".layer").data(layers);
         
-        layerGroups.exit().remove();
+        
           
           
           /* at layerGroups, create a group and class it as "layer" for each element of layers*/
         layerGroups.enter().append("g").attr("class", "layer");
           
+        /* move it here as d3 v4 suggested */
+        layerGroups.exit().remove();
         
         
         /* for each layer's style, using colorScale(d.key) */
@@ -171,10 +173,11 @@
           return colorScale(d.key);
         });
 
-          
+        /* */
         var bars = layerGroups.selectAll("rect").data(function (d){
           return d.values;
         });
+          
         bars.enter().append("rect")
         bars.exit().remove();
         bars
