@@ -171,18 +171,27 @@
           return colorScale(d.key);
         });
 
-        /* */
+        /* create bars on layerGroup g position */
+          /* bind each rect with d.values */
         var bars = layerGroups.selectAll("rect").data(function (d){
           return d.values;
         });
           
+        /* create a rect for each layer/datapoint */  
         bars.enter().append("rect")
         bars.exit().remove();
+          
+        /* set each bar's x value using xScale with xColumn */
         bars
           .attr("x", function (d){ return xScale(d[xColumn]); })
+        /* set each bar's y value using yScale with y0+y */
           .attr("y", function (d){ return yScale(d.y0 + d.y); })
+        /* set bar width to be xScale's rangeBand */
           .attr("width", xScale.rangeBand())
+        /* set each bar's height */
           .attr("height", function (d){ return innerHeight - yScale(d.y); })
+          
+          
       }
 
       function type(d){
