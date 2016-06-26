@@ -159,14 +159,12 @@
         var layerGroups = g.selectAll(".layer").data(layers);
         
         
-          
+        /* move it here as d3 v4 suggested */
+        layerGroups.exit().remove();
           
           /* at layerGroups, create a group and class it as "layer" for each element of layers*/
         layerGroups.enter().append("g").attr("class", "layer");
           
-        /* move it here as d3 v4 suggested */
-        layerGroups.exit().remove();
-        
         
         /* for each layer's style, using colorScale(d.key) */
         layerGroups.style("fill", function (d){
