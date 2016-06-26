@@ -50,55 +50,93 @@
       var colorColumn = "religion"; /* columns for color by religion */
       var layerColumn = colorColumn; /* column for grouping by religion */
 
+    /* set inner svg canvas size */
       var innerWidth  = outerWidth  - margin.left - margin.right;
       var innerHeight = outerHeight - margin.top  - margin.bottom;
 
+    /* create dom for outer svg canvas */
       var svg = d3.select("body").append("svg")
-        .attr("width",  outerWidth)
+        .attr("width",  outerWidth) /* set size of canvas */
         .attr("height", outerHeight);
+        
+    /* create a group g inside svg canvas */
       var g = svg.append("g")
+      /* move this g to inner center of svg canvas */
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        
+    /* upon inner center g, create another group g */
       var xAxisG = g.append("g")
-        .attr("class", "x axis")
+        .attr("class", "x axis")  /* class this g as 'x axis' */
+      /* move this g to bottom */
         .attr("transform", "translate(0," + innerHeight + ")");
+        
+    /* upon inner center g, create a third group g*/
       var yAxisG = g.append("g")
+      /* class it as 'y axis' */
         .attr("class", "y axis");
 
+    /* create xScale func for ordinal/categorical values  */
+        /* set rangeBands with [,] and barPadding */
       var xScale = d3.scale.ordinal().rangeBands([0, innerWidth], barPadding);
+      
+    /* create yScale func for numeric values */    
+        /* set range with [,] */
       var yScale = d3.scale.linear().range([innerHeight, 0]);
+        
+    /* set colorScale to be d3.scale.category10() */
       var colorScale = d3.scale.category10();
 
-      // Use a modified SI formatter that uses "B" for Billion.
+    /* create a d3.format() */
       var siFormat = d3.format("s");
+      
+    /* change format "s" post unit from G to B */    
       var customTickFormat = function (d){
         return siFormat(d).replace("G", "B");
       };
 
+    /* create a svg axis; using xScale func, put it at bottom */
       var xAxis = d3.svg.axis().scale(xScale).orient("bottom")
         .outerTickSize(0);
+        
+    /* create a svg axis; using yScale func, put it on the left */    
       var yAxis = d3.svg.axis().scale(yScale).orient("left")
+      /* set 5 ticks, but d3 will optimise the number for best viewing */
         .ticks(5)
+      /* change tick format */
         .tickFormat(customTickFormat)
+      /* shrink outerTickSize to 0 */
         .outerTickSize(0);
 
+        
+    /* create a render func */
       function render(data){
 
+        /* group dataset by layerColumn */
         var nested = d3.nest()
           .key(function (d){ return d[layerColumn]; })
           .entries(data)
 
+        /* create stack func */
         var stack = d3.layout.stack()
+            /* set y value */
           .y(function (d){ return d[yColumn]; })
+        /* set values for stack func as displayed in example 16 */
           .values(function (d){ return d.values; });
 
+        /* run stack func with nested/grouped dataset */
         var layers = stack(nested);
 
+        /* set xScale.domain range*/
+          /* access first element of layers, get values, and get every object's xColumn value, which is country */
+          /* see example 16*/
         xScale.domain(layers[0].values.map(function (d){
           return d[xColumn];
         }));
 
+        /* set yScale domain: [0, ]*/
         yScale.domain([
           0,
+        /* get max y0+y for each and all layers */
           d3.max(layers, function (layer){
             return d3.max(layer.values, function (d){
               return d.y0 + d.y;
@@ -106,20 +144,34 @@
           })
         ]);
 
+        /* set colorScale's domain value to be every layer's key (religion) */
+          /* get each layer's key (religion) */
         colorScale.domain(layers.map(function (layer){
           return layer.key;
         }));
 
+        /* at xAxis g group, call to draw xAxis*/
         xAxisG.call(xAxis);
+        /* at yAxis g group, call to draw yAxis*/
         yAxisG.call(yAxis);
 
+        /* upon inner center g, create layerGroups to bind layers doms with dataset layers */
         var layerGroups = g.selectAll(".layer").data(layers);
-        layerGroups.enter().append("g").attr("class", "layer");
+        
         layerGroups.exit().remove();
+          
+          
+          /* at layerGroups, create a group and class it as "layer" for each element of layers*/
+        layerGroups.enter().append("g").attr("class", "layer");
+          
+        
+        
+        /* for each layer's style, using colorScale(d.key) */
         layerGroups.style("fill", function (d){
           return colorScale(d.key);
         });
 
+          
         var bars = layerGroups.selectAll("rect").data(function (d){
           return d.values;
         });
